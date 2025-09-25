@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { authService } from '../services/authService';
 
 interface LoginPageProps {
@@ -12,6 +12,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Forgot Password Modal States
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isResetLoading, setIsResetLoading] = useState(false);
+  const [resetError, setResetError] = useState('');
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +72,48 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   const handleCreateAccount = () => {
     window.open('https://bcombuddy.netlify.app/signup', '_blank');
+  };
+
+  const handleForgotPassword = () => {
+    setShowForgotPassword(true);
+    setResetEmail('');
+    setResetError('');
+    setResetSuccess(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError('');
+    setIsResetLoading(true);
+
+    if (!resetEmail) {
+      setResetError('Please enter your email address');
+      setIsResetLoading(false);
+      return;
+    }
+
+    try {
+      const result = await authService.sendPasswordReset(resetEmail);
+      
+      if (result.success) {
+        setResetSuccess(true);
+        setResetEmail('');
+      } else {
+        setResetError(result.error || 'Failed to send reset email. Please try again.');
+      }
+    } catch (error) {
+      setResetError('An unexpected error occurred. Please try again.');
+      console.error('Password reset error:', error);
+    } finally {
+      setIsResetLoading(false);
+    }
+  };
+
+  const closeForgotPasswordModal = () => {
+    setShowForgotPassword(false);
+    setResetEmail('');
+    setResetError('');
+    setResetSuccess(false);
   };
 
   return (
@@ -142,9 +191,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
             {/* Forgot Password Link */}
             <div className="text-right">
-              <a href="#" className="text-sm text-blue-600 hover:text-blue-500 font-medium">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-blue-600 hover:text-blue-500 font-medium hover:underline"
+              >
                 Forgot your password?
-              </a>
+              </button>
             </div>
 
             {/* Sign In Button */}
@@ -235,6 +288,114 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           </p>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+            {/* Close Button */}
+            <button
+              onClick={closeForgotPasswordModal}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="text-center mb-6">
+              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
+              <p className="text-gray-600">
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+            </div>
+
+            {/* Success Message */}
+            {resetSuccess && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
+                <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
+                <div>
+                  <p className="text-green-800 font-medium">Password reset link sent!</p>
+                  <p className="text-green-700 text-sm">
+                    Check your email for instructions to reset your password.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {resetError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
+                <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0" />
+                <p className="text-red-800">{resetError}</p>
+              </div>
+            )}
+
+            {/* Reset Form */}
+            {!resetSuccess && (
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div>
+                  <label htmlFor="resetEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="resetEmail"
+                      type="email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="Enter your email address"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    type="button"
+                    onClick={closeForgotPasswordModal}
+                    className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isResetLoading}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isResetLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Sending...
+                      </div>
+                    ) : (
+                      'Send Reset Link'
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Success Actions */}
+            {resetSuccess && (
+              <div className="flex space-x-3">
+                <button
+                  onClick={closeForgotPasswordModal}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
