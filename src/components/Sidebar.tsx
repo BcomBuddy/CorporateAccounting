@@ -6,16 +6,18 @@ import {
   Star, 
   BarChart3, 
   FileText,
-  Building2
+  Building2,
+  LogOut
 } from 'lucide-react';
 import { ActiveUnit } from '../App';
 
 interface SidebarProps {
   activeUnit: ActiveUnit;
   setActiveUnit: (unit: ActiveUnit) => void;
+  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeUnit, setActiveUnit }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeUnit, setActiveUnit, onLogout }) => {
   const menuItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'unit1', label: 'Unit I: Share Capital', icon: TrendingUp },
@@ -62,6 +64,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activeUnit, setActiveUnit }) => {
           );
         })}
       </nav>
+
+      {/* Logout Button */}
+      <div className="absolute bottom-16 left-0 right-0 p-4">
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="text-sm font-medium">Logout</span>
+        </button>
+      </div>
 
       {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
