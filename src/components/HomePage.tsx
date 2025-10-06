@@ -9,6 +9,7 @@ import {
   Calculator,
   Award
 } from 'lucide-react';
+import { SSOTestComponent } from './SSOTestComponent';
 
 const HomePage: React.FC = () => {
   const modules = [
@@ -133,6 +134,11 @@ const HomePage: React.FC = () => {
               </div>
             );
           })}
+        </div>
+
+        {/* SSO Test Component */}
+        <div className="mt-12">
+          <SSOTestComponent />
         </div>
 
         {/* Getting Started */}

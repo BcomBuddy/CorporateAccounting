@@ -11,13 +11,21 @@ import {
 } from 'lucide-react';
 import { ActiveUnit } from '../App';
 
+interface UserInfo {
+  name: string;
+  email: string;
+  role: string;
+  yearOfStudy: string;
+}
+
 interface SidebarProps {
   activeUnit: ActiveUnit;
   setActiveUnit: (unit: ActiveUnit) => void;
   onLogout: () => void;
+  userInfo?: UserInfo;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeUnit, setActiveUnit, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeUnit, setActiveUnit, onLogout, userInfo }) => {
   const menuItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'unit1', label: 'Unit I: Share Capital', icon: TrendingUp },
@@ -41,6 +49,30 @@ const Sidebar: React.FC<SidebarProps> = ({ activeUnit, setActiveUnit, onLogout }
           </div>
         </div>
       </div>
+
+      {/* User Info Section */}
+      {userInfo && (
+        <div className="p-4 border-b border-gray-200 bg-blue-50">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">
+                {userInfo.name.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {userInfo.name}
+              </p>
+              <p className="text-xs text-gray-600 truncate">
+                {userInfo.email}
+              </p>
+              <p className="text-xs text-blue-600 font-medium">
+                {userInfo.yearOfStudy} • {userInfo.role}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="p-4 space-y-2">
